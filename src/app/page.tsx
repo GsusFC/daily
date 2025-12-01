@@ -10,10 +10,12 @@ export default function Home() {
     const { user, token, login } = useAuth();
     const [summary, setSummary] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchSummary = async () => {
         if (!token) return;
         setLoading(true);
+        setError(null);
         try {
             const res = await fetch("/api/daily-summary", {
                 method: "POST",
@@ -22,13 +24,19 @@ export default function Home() {
                 },
             });
             const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || "Failed to fetch summary");
+            }
+
             if (data.summary) {
                 setSummary(data.summary);
             } else {
-                console.error("No summary returned", data);
+                setError("No summary returned from API");
             }
-        } catch (error) {
-            console.error("Error fetching summary", error);
+        } catch (err: any) {
+            console.error("Error fetching summary", err);
+            setError(err.message || "An error occurred");
         } finally {
             setLoading(false);
         }
@@ -75,6 +83,12 @@ export default function Home() {
                             {loading ? "Generating..." : "Refresh Summary"}
                         </button>
                     </div>
+
+                    {error && (
+                        <div className="mb-8 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                            {error}
+                        </div>
+                    )}
 
                     {summary ? (
                         <div className="bg-white dark:bg-zinc-800 p-8 rounded-2xl shadow-lg prose dark:prose-invert max-w-none">

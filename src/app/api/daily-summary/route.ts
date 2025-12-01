@@ -84,10 +84,11 @@ export async function POST(req: NextRequest) {
         // 3. Generate Summary with Gemini
         let summary = "No data available to generate summary.";
         if (process.env.GEMINI_API_KEY) {
-            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+            try {
+                const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
-            const prompt = `
+                const prompt = `
         Eres el asistente ejecutivo de ${user.name || user.email}.
         Fecha: ${new Date().toLocaleDateString()}
         
@@ -106,8 +107,12 @@ export async function POST(req: NextRequest) {
         Usa un tono profesional pero cercano. Formato Markdown.
       `;
 
-            const result = await model.generateContent(prompt);
-            summary = result.response.text();
+                const result = await model.generateContent(prompt);
+                summary = result.response.text();
+            } catch (error) {
+                console.error("Gemini API Error:", error);
+                summary = "Error generating summary with Gemini. Please check your API key and quota.";
+            }
         }
 
         return NextResponse.json({
