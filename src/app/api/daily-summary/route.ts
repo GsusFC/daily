@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
         const timeMax = new Date();
         timeMax.setHours(23, 59, 59, 999);
 
-        let eventsData = [];
+        let eventsData: any[] = [];
         try {
             const events = await calendar.events.list({
                 calendarId: "primary",
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
         }
 
         // 2. Fetch Notion Tasks
-        let notionTasks = [];
+        let notionTasks: any[] = [];
         if (process.env.NOTION_TOKEN && process.env.NOTION_DATABASE_ID) {
             try {
                 const notion = new Client({ auth: process.env.NOTION_TOKEN });
