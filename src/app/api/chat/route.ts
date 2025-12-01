@@ -57,9 +57,14 @@ export async function POST(req: NextRequest) {
         if (process.env.NOTION_TOKEN && process.env.NOTION_DATABASE_ID) {
             try {
                 const notion = new Client({ auth: process.env.NOTION_TOKEN });
-                const response = await notion.databases.query({
+                const response = await (notion.databases as any).query({
                     database_id: process.env.NOTION_DATABASE_ID,
-                    filter: { property: "Status", status: { does_not_equal: "Done" } },
+                    filter: {
+                        property: "Status",
+                        status: {
+                            does_not_equal: "Done"
+                        }
+                    }
                 });
                 contextData.tasks = response.results;
             } catch (e) {
