@@ -7,7 +7,7 @@ import ReactMarkdown from "react-markdown";
 import ChatInterface from "@/components/ChatInterface";
 
 export default function Home() {
-    const { user, token, login } = useAuth();
+    const { user, token, login, logout } = useAuth();
     const [summary, setSummary] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -50,13 +50,21 @@ export default function Home() {
                 </p>
                 <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
                     {user ? (
-                        <div className="flex items-center gap-4">
-                            <img
-                                src={user.picture}
-                                alt={user.name}
-                                className="w-10 h-10 rounded-full"
-                            />
-                            <span className="hidden md:block">{user.name}</span>
+                        <div className="flex flex-col md:flex-row items-center gap-4">
+                            <div className="flex items-center gap-4">
+                                <img
+                                    src={user.picture}
+                                    alt={user.name}
+                                    className="w-10 h-10 rounded-full"
+                                />
+                                <span className="hidden md:block">{user.name}</span>
+                            </div>
+                            <button
+                                onClick={logout}
+                                className="text-sm text-red-500 hover:text-red-700 underline"
+                            >
+                                Sign Out
+                            </button>
                         </div>
                     ) : (
                         <span>Not logged in</span>

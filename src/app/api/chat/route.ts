@@ -54,27 +54,38 @@ export async function POST(req: NextRequest) {
             console.error("Calendar fetch failed in chat", e);
         }
 
-        if (process.env.NOTION_TOKEN && process.env.NOTION_DATABASE_ID) {
+        const notionToken = process.env.NOTION_TOKEN;
+        const dbIdsString = process.env.NOTION_DATABASE_IDS || process.env.NOTION_DATABASE_ID || "";
+        const dbIds = dbIdsString.split(',').map(id => id.trim()).filter(id => id.length > 0);
+
+        if (notionToken && dbIds.length > 0) {
             try {
-                const notion = new Client({ auth: process.env.NOTION_TOKEN });
-                const response = await (notion.databases as any).query({
-                    database_id: process.env.NOTION_DATABASE_ID,
-                    filter: {
-                        property: "Status",
-                        status: {
-                            does_not_equal: "Done"
-                        }
+                const notion = new Client({ auth: notionToken });
+                const fetchPromises = dbIds.map(async (id) => {
+                    try {
+                        const response = await (notion.databases as any).query({
+                            database_id: id,
+                            filter: {
+                                property: "Status",
+                                status: { does_not_equal: "Done" }
+                            }
+                        });
+                        return response.results;
+                    } catch (e) {
+                        console.error(`Notion fetch failed for DB ${id}`, e);
+                        return [];
                     }
                 });
-                contextData.tasks = response.results;
+                const results = await Promise.all(fetchPromises);
+                contextData.tasks = results.flat();
             } catch (e) {
-                console.error("Notion fetch failed in chat", e);
+                console.error("Notion setup failed in chat", e);
             }
         }
 
         // 2. Initialize Gemini Chat
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
         const systemContext = `
       Contexto del usuario (${user.name}):

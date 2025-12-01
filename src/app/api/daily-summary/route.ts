@@ -21,6 +21,7 @@ function validateUser(token: string) {
 }
 
 export async function POST(req: NextRequest) {
+    console.log("API /api/daily-summary called");
     try {
         const authHeader = req.headers.get("Authorization");
         if (!authHeader) {
@@ -63,22 +64,44 @@ export async function POST(req: NextRequest) {
 
         // 2. Fetch Notion Tasks
         let notionTasks: any[] = [];
-        if (process.env.NOTION_TOKEN && process.env.NOTION_DATABASE_ID) {
+        const notionToken = process.env.NOTION_TOKEN;
+        // Support multiple IDs comma separated, or single ID fallback
+        const dbIdsString = process.env.NOTION_DATABASE_IDS || process.env.NOTION_DATABASE_ID || "";
+        const dbIds = dbIdsString.split(',').map(id => id.trim()).filter(id => id.length > 0);
+
+        if (notionToken && dbIds.length > 0) {
             try {
-                const notion = new Client({ auth: process.env.NOTION_TOKEN });
-                const response = await (notion.databases as any).query({
-                    database_id: process.env.NOTION_DATABASE_ID,
-                    filter: {
-                        property: "Status", // Assuming a Status property exists
-                        status: {
-                            does_not_equal: "Done",
-                        },
-                    },
+                const notion = new Client({ auth: notionToken });
+
+                console.log(`Notion: Fetching from ${dbIds.length} databases...`);
+
+                const fetchPromises = dbIds.map(async (id) => {
+                    try {
+                        const response = await (notion.databases as any).query({
+                            database_id: id,
+                            filter: {
+                                property: "Status",
+                                status: {
+                                    does_not_equal: "Done",
+                                },
+                            },
+                        });
+                        return response.results;
+                    } catch (err: any) {
+                        console.error(`Error fetching Notion DB ${id}:`, err.message);
+                        return [];
+                    }
                 });
-                notionTasks = response.results;
-            } catch (error) {
-                console.error("Error fetching Notion:", error);
+
+                const results = await Promise.all(fetchPromises);
+                notionTasks = results.flat();
+
+                console.log(`Notion: Successfully fetched ${notionTasks.length} tasks total.`);
+            } catch (error: any) {
+                console.error("Error initializing Notion:", error.message);
             }
+        } else {
+            console.log("Notion: Skipping fetch (Missing TOKEN or DATABASE_IDS)");
         }
 
         // 3. Generate Summary with Gemini
@@ -86,11 +109,14 @@ export async function POST(req: NextRequest) {
         if (process.env.GEMINI_API_KEY) {
             try {
                 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-                const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+                const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+                const dateOptions: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const today = new Date().toLocaleDateString("es-ES", dateOptions);
 
                 const prompt = `
         Eres el asistente ejecutivo de ${user.name || user.email}.
-        Fecha: ${new Date().toLocaleDateString()}
+        Fecha actual: ${today}
         
         EVENTOS DE HOY (Google Calendar):
         ${JSON.stringify(eventsData, null, 2)}
@@ -109,9 +135,10 @@ export async function POST(req: NextRequest) {
 
                 const result = await model.generateContent(prompt);
                 summary = result.response.text();
-            } catch (error) {
-                console.error("Gemini API Error:", error);
-                summary = "Error generating summary with Gemini. Please check your API key and quota.";
+            } catch (error: any) {
+                console.error("Gemini API Error Full:", JSON.stringify(error, null, 2));
+                console.error("Gemini API Error Message:", error.message);
+                summary = `Error generating summary with Gemini: ${error.message}`;
             }
         }
 
