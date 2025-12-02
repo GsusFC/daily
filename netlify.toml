@@ -2,10 +2,9 @@
   command = "npm run build"
   publish = ".next"
 
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
+[plugins]
+  package = "@netlify/plugin-nextjs"
 
 [context.production.environment]
-  GOOGLE_OAUTH_REDIRECT = "https://tuapp.netlify.app/callback"
+  GOOGLE_OAUTH_REDIRECT = "https://dailyflocculant.netlify.app"
+
