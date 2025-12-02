@@ -103,7 +103,8 @@ export interface FormattedTask {
     title: string;
     status: string;
     priority?: string;
-    dueDate?: string;
+    dueDate?: string; // Ahora será la fecha de inicio
+    endDate?: string; // Nueva propiedad para fecha de fin
     assignees?: string[];
     project?: string;
 }

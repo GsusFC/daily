@@ -162,13 +162,19 @@ export function formatTasksForPrompt(dbGroups: DatabaseGroup[]): FormattedTaskGr
                 }
             }
 
+            // Extraer fechas (start y end)
+            const dateProp = task.properties["Due Date"]?.date || task.properties["Date"]?.date;
+            const dueDate = dateProp?.start;
+            const endDate = dateProp?.end || undefined;
+
             return {
                 title: title,
                 status: task.properties.Status?.status?.name || "Sin estado",
                 priority: task.properties.Priority?.select?.name,
-                dueDate: task.properties["Due Date"]?.date?.start || task.properties["Date"]?.date?.start,
+                dueDate: dueDate,
+                endDate: endDate,
                 assignees: assignees.length > 0 ? assignees : undefined,
-                project: projectContext || undefined, // Nuevo campo
+                project: projectContext || undefined, 
             };
         })
     }));
