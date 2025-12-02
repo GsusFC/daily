@@ -56,10 +56,20 @@ export async function fetchPendingTasks(
                                 },
                             },
                             {
-                                property: "Date",
-                                date: {
-                                    on_or_before: new Date().toISOString().split('T')[0],
-                                },
+                                or: [
+                                    {
+                                        property: "Date",
+                                        date: {
+                                            on_or_before: new Date().toISOString().split('T')[0],
+                                        },
+                                    },
+                                    {
+                                        property: "Date",
+                                        date: {
+                                            is_empty: true,
+                                        },
+                                    },
+                                ],
                             },
                         ],
                     },

@@ -43,7 +43,17 @@ export function useDailySummary(): UseDailySummaryReturn {
             const data: DailySummaryResponse = await res.json();
 
             if (!res.ok) {
-                throw new Error((data as unknown as { error: string }).error || "Error al obtener resumen");
+                const errorMsg = (data as unknown as { error: string }).error || "Error desconocido";
+                
+                // Traducir errores comunes a mensajes amigables
+                if (res.status === 401 || errorMsg.includes("Unauthorized")) {
+                    throw new Error("Tu sesión ha expirado o no es válida. Por favor, cierra sesión y vuelve a entrar.");
+                }
+                if (res.status === 500) {
+                    throw new Error("Error interno del servidor. Revisa la configuración de claves API.");
+                }
+                
+                throw new Error(errorMsg);
             }
 
             setSummary(data.summary);
