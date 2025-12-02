@@ -93,6 +93,12 @@ export interface NotionTask {
     };
 }
 
+export interface DatabaseGroup {
+    id: string;
+    title: string;
+    tasks: NotionTask[];
+}
+
 export interface FormattedTask {
     title: string;
     status: string;
@@ -110,7 +116,7 @@ export interface FormattedTaskGroup {
 // --- API Responses ---
 export interface ContextData {
     events: CalendarEvent[];
-    tasks: NotionTask[];
+    taskGroups: DatabaseGroup[];
 }
 
 export interface DailySummaryResponse {
@@ -118,7 +124,7 @@ export interface DailySummaryResponse {
     warnings?: string[];
     rawData: {
         events: CalendarEvent[];
-        tasks: NotionTask[];
+        tasks: NotionTask[]; // Mantenemos aplanado en rawData por compatibilidad frontend
     };
 }
 

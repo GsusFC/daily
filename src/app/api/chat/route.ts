@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
         let contextData: ContextData | null = contextCache.get(userId);
 
         if (!contextData) {
-            contextData = { events: [], tasks: [] };
+            contextData = { events: [], taskGroups: [] };
 
             // Fetch Calendar
             try {
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
             if (notionToken && dbIds.length > 0) {
                 try {
-                    contextData.tasks = await fetchPendingTasks(notionToken, dbIds);
+                    contextData.taskGroups = await fetchPendingTasks(notionToken, dbIds);
                 } catch (error) {
                     console.error("[Chat/Notion] Error:", error);
                 }
@@ -61,12 +61,12 @@ export async function POST(req: NextRequest) {
 
         // 3. Enviar mensaje a Gemini
         const formattedEvents = formatEventsForPrompt(contextData.events);
-        const formattedTasks = formatTasksForPrompt(contextData.tasks);
+        const formattedTaskGroups = formatTasksForPrompt(contextData.taskGroups);
 
         const response = await sendChatMessage(
             user.name || user.email,
             formattedEvents,
-            formattedTasks,
+            formattedTaskGroups,
             history || [],
             message
         );

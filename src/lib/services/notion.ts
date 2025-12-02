@@ -1,5 +1,5 @@
 import { Client } from "@notionhq/client";
-import type { NotionTask, FormattedTask, FormattedTaskGroup } from "@/types";
+import type { NotionTask, FormattedTask, FormattedTaskGroup, DatabaseGroup } from "@/types";
 import {
     NOTION_STATUS_PROPERTY,
     NOTION_DONE_STATUS,
@@ -12,15 +12,6 @@ import {
  * @param notionToken - Token de integración de Notion
  * @param databaseIds - Array de IDs de bases de datos
  * @returns Lista de tareas pendientes
- */
-export interface DatabaseGroup {
-    id: string;
-    title: string;
-    tasks: NotionTask[];
-}
-
-/**
- * Obtiene las tareas pendientes agrupadas por base de datos.
  */
 export async function fetchPendingTasks(
     notionToken: string,
