@@ -3,20 +3,7 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { googleLogout } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
-
-interface User {
-    email: string;
-    name: string;
-    picture: string;
-    hd?: string;
-}
-
-interface AuthContextType {
-    user: User | null;
-    token: string | null;
-    login: (token: string, user: User) => void;
-    logout: () => void;
-}
+import type { User, AuthContextType } from "@/types";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
