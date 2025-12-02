@@ -7,9 +7,8 @@ import {
     parseNotionDatabaseIds,
     formatTasksForPrompt,
     generateDailySummary,
-    type DatabaseGroup, // Importar tipo desde el barrel
 } from "@/lib/services";
-import type { CalendarEvent, NotionTask, DailySummaryResponse } from "@/types";
+import type { CalendarEvent, NotionTask, DailySummaryResponse, DatabaseGroup } from "@/types";
 
 export async function POST(req: NextRequest) {
     const warnings: string[] = [];
