@@ -114,11 +114,20 @@ export default function Home() {
                         )}
 
                         {error && (
-                            <div className="pointer-events-auto p-4 bg-red-50/90 dark:bg-red-900/90 border border-red-200/50 dark:border-red-800/30 text-red-700 dark:text-red-200 rounded-2xl text-sm backdrop-blur-md shadow-lg max-w-sm animate-in slide-in-from-right-4 duration-300" role="alert">
-                                <div className="flex items-center gap-2">
+                            <div className="pointer-events-auto p-4 bg-red-50/90 dark:bg-red-900/90 border border-red-200/50 dark:border-red-800/30 text-red-700 dark:text-red-200 rounded-2xl text-sm backdrop-blur-md shadow-lg max-w-sm animate-in slide-in-from-right-4 duration-300 flex flex-col gap-3" role="alert">
+                                <div className="flex items-center gap-2 font-medium">
                                     <svg className="w-5 h-5 flex-shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    <span>{error}</span>
+                                    <span>Error</span>
                                 </div>
+                                <p className="opacity-90 leading-relaxed">{error}</p>
+                                {(error.includes("sesión") || error.includes("Unauthorized")) && (
+                                    <button 
+                                        onClick={logout}
+                                        className="self-start px-3 py-1.5 bg-red-100 dark:bg-red-950/50 text-red-700 dark:text-red-200 rounded-lg text-xs font-semibold hover:bg-red-200 dark:hover:bg-red-900 transition-colors border border-red-200 dark:border-red-800/50"
+                                    >
+                                        Cerrar sesión y reintentar
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>

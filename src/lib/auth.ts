@@ -38,7 +38,7 @@ export async function validateGoogleToken(
             
             // Verificar que el token fue emitido para nuestra app
             if (tokenInfo.aud !== clientId) {
-                console.error("[Auth] Token audience mismatch");
+                console.error(`[Auth] Token audience mismatch. Expected: ${clientId}, Got: ${tokenInfo.aud}`);
                 return null;
             }
 
@@ -50,7 +50,10 @@ export async function validateGoogleToken(
                 }
             );
             
-            if (!userInfoRes.ok) return null;
+            if (!userInfoRes.ok) {
+                console.error(`[Auth] User info fetch failed. Status: ${userInfoRes.status}`);
+                return null;
+            }
             
             const userInfo = await userInfoRes.json();
             
@@ -68,7 +71,8 @@ export async function validateGoogleToken(
             };
         }
     } catch (error) {
-        console.error("[Auth] Token validation failed:", error);
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.error(`[Auth] Token validation failed completely. ClientID: ${clientId.slice(0, 10)}... Error:`, errorMsg);
         return null;
     }
 }
